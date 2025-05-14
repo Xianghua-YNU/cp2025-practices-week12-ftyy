@@ -19,6 +19,11 @@ def load_supernova_data(file_path):
     #[STUDENT_CODE_HERE]
     #raise NotImplementedError("请在 {} 中实现此函数。".format(__file__))
     #return z, mu, mu_err
+    data = np.loadtxt(file_path, delimiter='\t', skiprows=6)
+    z = data[:, 0]
+    mu = data[:, 1]
+    mu_err = data[:, 2]
+    return z, mu, mu_err
 
 
 def hubble_model(z, H0):
@@ -36,6 +41,9 @@ def hubble_model(z, H0):
     #[STUDENT_CODE_HERE]
     #raise NotImplementedError("请在 {} 中实现此函数。".format(__file__))
     #return mu
+    c = 299792.458  # km/s
+    mu = 5 * np.log10(c * z / H0) + 25
+    return mu
 
 
 def hubble_model_with_deceleration(z, H0, a1):
@@ -54,6 +62,9 @@ def hubble_model_with_deceleration(z, H0, a1):
     #[STUDENT_CODE_HERE]
     #raise NotImplementedError("请在 {} 中实现此函数。".format(__file__))
     #return mu
+    c = 299792.458  # km/s
+    mu = 5 * np.log10(c * z / H0 * (1 + 0.5 * (1 - a1) * z)) + 25
+    return mu
 
 
 def hubble_fit(z, mu, mu_err):
@@ -74,6 +85,11 @@ def hubble_fit(z, mu, mu_err):
     #[STUDENT_CODE_HERE]
     #raise NotImplementedError("请在 {} 中实现此函数。".format(__file__))
     #return H0, H0_err
+    H0_guess = 70.0
+    popt, pcov = curve_fit(hubble_model, z, mu, p0=[H0_guess], sigma=mu_err, absolute_sigma=True)
+    H0 = popt[0]
+    H0_err = np.sqrt(pcov[0, 0])
+    return H0, H0_err
 
 
 def hubble_fit_with_deceleration(z, mu, mu_err):
@@ -96,6 +112,15 @@ def hubble_fit_with_deceleration(z, mu, mu_err):
     #[STUDENT_CODE_HERE]
     #raise NotImplementedError("请在 {} 中实现此函数。".format(__file__))
     #return H0, H0_err, a1, a1_err
+    H0_guess = 70.0
+    a1_guess = 1.0
+    popt, pcov = curve_fit(hubble_model_with_deceleration, z, mu, p0=[H0_guess, a1_guess], sigma=mu_err, absolute_sigma=True)
+    H0 = popt[0]
+    a1 = popt[1]
+    H0_err = np.sqrt(pcov[0, 0])
+    a1_err = np.sqrt(pcov[1, 1])
+    return H0, H0_err, a1, a1_err
+
 
 
 def plot_hubble_diagram(z, mu, mu_err, H0):
@@ -115,6 +140,20 @@ def plot_hubble_diagram(z, mu, mu_err, H0):
     #[STUDENT_CODE_HERE]
     #raise NotImplementedError("请在 {} 中实现此函数。".format(__file__))
     #return plt.gcf()
+    plt.figure(figsize=(10, 6))
+    plt.errorbar(z, mu, yerr=mu_err, fmt='o', color='blue', markersize=5, 
+                 ecolor='gray', elinewidth=1, capsize=2, label='Supernova data')
+    z_fit = np.linspace(min(z), max(z), 1000)
+    mu_fit = hubble_model(z_fit, H0)
+    plt.plot(z_fit, mu_fit, '-', color='red', linewidth=2, 
+             label=f'Best fit: $H_0$ = {H0:.1f} km/s/Mpc')
+    plt.xlabel('Redshift z')
+    plt.ylabel('Distance modulus μ')
+    plt.title('Hubble Diagram')
+    plt.legend()
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    return plt.gcf()
 
 
 def plot_hubble_diagram_with_deceleration(z, mu, mu_err, H0, a1):
@@ -135,6 +174,20 @@ def plot_hubble_diagram_with_deceleration(z, mu, mu_err, H0, a1):
     #[STUDENT_CODE_HERE]
     #raise NotImplementedError("请在 {} 中实现此函数。".format(__file__))
     #return plt.gcf()
+    plt.figure(figsize=(10, 6))
+    plt.errorbar(z, mu, yerr=mu_err, fmt='o', color='blue', markersize=5, 
+                 ecolor='gray', elinewidth=1, capsize=2, label='Supernova data')
+    z_fit = np.linspace(min(z), max(z), 1000)
+    mu_fit = hubble_model_with_deceleration(z_fit, H0, a1)
+    plt.plot(z_fit, mu_fit, '-', color='red', linewidth=2, 
+             label=f'Best fit: $H_0$ = {H0:.1f} km/s/Mpc, $a_1$ = {a1:.2f}')
+    plt.xlabel('Redshift z')
+    plt.ylabel('Distance modulus μ')
+    plt.title('Hubble Diagram with Deceleration Parameter')
+    plt.legend()
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    return plt.gcf()
 
 
 if __name__ == "__main__":
