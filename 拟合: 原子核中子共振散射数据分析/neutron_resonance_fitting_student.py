@@ -18,7 +18,6 @@ def breit_wigner(E, Er, Gamma, fr):
     # TODO: 在此实现Breit-Wigner公式 (约1行代码)
     # [STUDENT_CODE_HERE]
     return (fr * Gamma**2) / ((E - Er)**2 + (Gamma/2)**2)
-    raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
 
 def fit_without_errors(energy, cross_section):
     """
@@ -43,7 +42,6 @@ def fit_without_errors(energy, cross_section):
     popt, pcov = curve_fit(breit_wigner, energy, cross_section, 
                            p0=[Er_guess, Gamma_guess, fr_guess])
     return popt, pcov
-    raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
 
 def fit_with_errors(energy, cross_section, errors):
     """
@@ -70,7 +68,6 @@ def fit_with_errors(energy, cross_section, errors):
                            p0=[Er_guess, Gamma_guess, fr_guess], 
                            sigma=errors, absolute_sigma=True)
     return popt, pcov
-    raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
 
 def plot_fit_results(energy, cross_section, errors, popt, pcov, title):
     """
