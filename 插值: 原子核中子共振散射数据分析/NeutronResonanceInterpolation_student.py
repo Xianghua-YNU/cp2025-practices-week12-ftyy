@@ -26,7 +26,20 @@ def lagrange_interpolation(x, x_data, y_data):
     """
     # TODO: 在此实现拉格朗日插值算法 (大约10-15行代码)
     # [STUDENT_CODE_HERE]
-    raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
+    x = np.array(x, ndmin=1)
+    n = len(x_data)
+    result = np.zeros_like(x, dtype=float)
+    for k, xk in enumerate(x):
+        s = 0.0
+        for i in range(n):
+            li = 1.0
+            for j in range(n):
+                if i != j:
+                    li *= (xk - x_data[j]) / (x_data[i] - x_data[j])
+            s += y_data[i] * li
+        result[k] = s
+    if result.size == 1:
+        return result[0]
     return result
 
 def cubic_spline_interpolation(x, x_data, y_data):
@@ -48,8 +61,8 @@ def cubic_spline_interpolation(x, x_data, y_data):
     """
     # TODO: 在此实现三次样条插值 (大约2-3行代码)
     # [STUDENT_CODE_HERE]
-    raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
-    return result
+    spline = interp1d(x_data, y_data, kind='cubic', fill_value="extrapolate")
+    return spline(x)
 
 def find_peak(x, y):
     """
@@ -69,7 +82,32 @@ def find_peak(x, y):
     """
     # TODO: 在此实现共振峰分析 (大约5-8行代码)
     # [STUDENT_CODE_HERE]
-    raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
+    idx_max = np.argmax(y)
+    peak_x = x[idx_max]
+    peak_y = y[idx_max]
+    half_max = peak_y / 2.0
+
+    # 找左半高点
+    left_idx = np.where(y[:idx_max] < half_max)[0]
+    if len(left_idx) > 0:
+        left = left_idx[-1]
+        x1, y1 = x[left], y[left]
+        x2, y2 = x[left+1], y[left+1]
+        left_half = x1 + (half_max - y1) * (x2 - x1) / (y2 - y1)
+    else:
+        left_half = x[0]
+
+    # 找右半高点
+    right_idx = np.where(y[idx_max:] < half_max)[0]
+    if len(right_idx) > 0:
+        right = idx_max + right_idx[0]
+        x1, y1 = x[right-1], y[right-1]
+        x2, y2 = x[right], y[right]
+        right_half = x1 + (half_max - y1) * (x2 - x1) / (y2 - y1)
+    else:
+        right_half = x[-1]
+
+    fwhm = right_half - left_half
     return peak_x, fwhm
 
 def plot_results():
