@@ -17,6 +17,7 @@ def breit_wigner(E, Er, Gamma, fr):
     """
     # TODO: 在此实现Breit-Wigner公式 (约1行代码)
     # [STUDENT_CODE_HERE]
+    return (fr * Gamma**2) / ((E - Er)**2 + (Gamma/2)**2)
     raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
 
 def fit_without_errors(energy, cross_section):
@@ -39,6 +40,9 @@ def fit_without_errors(energy, cross_section):
     
     # TODO: 使用curve_fit进行拟合 (约1行代码)
     # [STUDENT_CODE_HERE]
+    popt, pcov = curve_fit(breit_wigner, energy, cross_section, 
+                           p0=[Er_guess, Gamma_guess, fr_guess])
+    return popt, pcov
     raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
 
 def fit_with_errors(energy, cross_section, errors):
@@ -62,6 +66,10 @@ def fit_with_errors(energy, cross_section, errors):
     
     # TODO: 使用curve_fit进行拟合，考虑误差 (约1行代码)
     # [STUDENT_CODE_HERE]
+    popt, pcov = curve_fit(breit_wigner, energy, cross_section, 
+                           p0=[Er_guess, Gamma_guess, fr_guess], 
+                           sigma=errors, absolute_sigma=True)
+    return popt, pcov
     raise NotImplementedError("请在 {} 中实现此函数".format(__file__))
 
 def plot_fit_results(energy, cross_section, errors, popt, pcov, title):
@@ -95,6 +103,7 @@ def plot_fit_results(energy, cross_section, errors, popt, pcov, title):
     Gamma_std = np.sqrt(pcov[1, 1])
     fr_std = np.sqrt(pcov[2, 2])
     
+    #计算95%置信区间
     plt.text(0.05, 0.95, 
              f'$E_r$ = {Er:.1f} ± {1.96*Er_std:.1f} MeV (95% CI)\n'
              f'$\Gamma$ = {Gamma:.1f} ± {1.96*Gamma_std:.1f} MeV (95% CI)\n'
